@@ -28,6 +28,11 @@ public class PerlinNoise : MonoBehaviour
 
 
     [SerializeField]
+    private float clothingColorWidth;
+    [SerializeField]
+    private float clothingColorScale;
+
+    [SerializeField]
     private GameObject personPrefab;
     private List<Person> people = new List<Person>();
 
@@ -36,6 +41,19 @@ public class PerlinNoise : MonoBehaviour
 
     [SerializeField]
     private Renderer texRenderer;
+
+    [SerializeField]
+    private Renderer redtexRenderer;
+
+    [SerializeField]
+    private Renderer greentexRenderer;
+
+    [SerializeField]
+    private Renderer bluetexRenderer;
+
+    [SerializeField]
+    private Transform crowdParent;
+
     private void Start()
     {
         for (int i = 0; i < 10; i++)
@@ -50,7 +68,7 @@ public class PerlinNoise : MonoBehaviour
     void Update()
     {
         // live noise representation
-        texRenderer.material.mainTexture = GenerateTexture();
+        GenerateTextures();
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
@@ -58,19 +76,19 @@ public class PerlinNoise : MonoBehaviour
             MovePeople(new Vector3(-10f * Time.deltaTime, 0f, 0f));
 
         }
-        if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow))
         {
             offsetX -= 10f * Time.deltaTime;
             MovePeople(new Vector3(10f * Time.deltaTime, 0f, 0f));
 
         }
-        if (Input.GetKey(KeyCode.UpArrow))
+        else if (Input.GetKey(KeyCode.UpArrow))
         {
             offsetY += 10f * Time.deltaTime;
             MovePeople(new Vector3(0f, -10f * Time.deltaTime, 0f));
 
         }
-        if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
             offsetY -= 10f * Time.deltaTime;
             MovePeople(new Vector3(0f, 10f * Time.deltaTime, 0f));
@@ -79,27 +97,26 @@ public class PerlinNoise : MonoBehaviour
 
     private void MovePeople(Vector3 move)
     {
+        crowdParent.transform.Translate(move);
         List<Person> peopleToAdd = new List<Person>();
-
         foreach (Person person in people)
         {
-            Vector3 newPersonLocation = person.Move(move);
-            if (newPersonLocation.x > rightXSpawnValue)
+            if (person.transform.position.x > rightXSpawnValue)
             {
                 peopleToAdd.Add(CreateNewPerson(leftXSpawnValue, person.transform.position.y));
                 person.Kill();
             }
-            else if (newPersonLocation.x < leftXSpawnValue)
+            else if (person.transform.position.x < leftXSpawnValue)
             {
                 peopleToAdd.Add(CreateNewPerson(rightXSpawnValue, person.transform.position.y));
                 person.Kill();
             }
-            else if (newPersonLocation.y > topYSpawnValue)
+            else if (person.transform.position.y > topYSpawnValue)
             {
                 peopleToAdd.Add(CreateNewPerson(person.transform.position.x, bottomYSpawnValue));
                 person.Kill();
             }
-            else if (newPersonLocation.y < bottomYSpawnValue)
+            else if (person.transform.position.y < bottomYSpawnValue)
             {
                 peopleToAdd.Add(CreateNewPerson(person.transform.position.x, topYSpawnValue));
                 person.Kill();
@@ -113,14 +130,16 @@ public class PerlinNoise : MonoBehaviour
 
     private Person CreateNewPerson(float x, float y)
     {
+        Debug.Log("creating new person from : "+ x + "," + y);
         Person newPerson = Instantiate(personPrefab, new Vector3(x, y, 0f),
-    Quaternion.identity).GetComponent<Person>();
-        newPerson.ChangeMatColor(CalculateColor(x * 10f, y * 10f));
+    Quaternion.identity, crowdParent).GetComponent<Person>();
+        newPerson.ChangeMatColor(CalculateClothingColor(x * 10f, y * 10f));
         return newPerson;
     }
 
-    private Texture2D GenerateTexture()
+    private void GenerateTextures()
     {
+        // thrift store location texture
         Texture2D texture = new Texture2D(width, height);
 
         for (int x = 0; x < width; x++)
@@ -132,7 +151,49 @@ public class PerlinNoise : MonoBehaviour
             }
         }
         texture.Apply();
-        return texture;
+        texRenderer.material.mainTexture =  texture;
+
+        // red texture
+        texture = new Texture2D(width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Color color = CalculateClothingColor(x, y);
+                texture.SetPixel(x, y, new Color(color.r, color.r, color.r));
+            }
+        }
+        texture.Apply();
+        redtexRenderer.material.mainTexture = texture;
+
+        // green texture
+        texture = new Texture2D(width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Color color = CalculateClothingColor(x, y);
+                texture.SetPixel(x, y, new Color(color.g, color.g, color.g));
+            }
+        }
+        texture.Apply();
+        greentexRenderer.material.mainTexture = texture;
+
+        // blue texture
+        texture = new Texture2D(width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Color color = CalculateClothingColor(x, y);
+                texture.SetPixel(x, y, new Color(color.b, color.b, color.b));
+            }
+        }
+        texture.Apply();
+        bluetexRenderer.material.mainTexture = texture;
     }
 
     private Color CalculateColor (float x, float y)
@@ -142,5 +203,23 @@ public class PerlinNoise : MonoBehaviour
 
         float sample = Mathf.Round(Mathf.PerlinNoise(xCoord, yCoord) + cutoffValue);
         return new Color(sample, sample, sample);
+    }
+
+    private Color CalculateClothingColor(float x, float y)
+    {
+        // red
+        float rxCoord = (float)x / clothingColorWidth * clothingColorScale;
+        float ryCoord = (float)y / clothingColorWidth * clothingColorScale;
+        // green
+        float gxCoord = (float)x / clothingColorWidth * clothingColorScale + 10f;
+        float gyCoord = (float)y / clothingColorWidth * clothingColorScale + 10f;
+        // blue
+        float bxCoord = (float)x / clothingColorWidth * clothingColorScale - 10f;
+        float byCoord = (float)y / clothingColorWidth * clothingColorScale - 10f;
+
+        float red = Mathf.PerlinNoise(rxCoord, ryCoord);
+        float green = Mathf.PerlinNoise(gxCoord, gyCoord);
+        float blue = Mathf.PerlinNoise(bxCoord, byCoord);
+        return new Color(red, green, blue);
     }
 }

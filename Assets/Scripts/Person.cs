@@ -20,16 +20,17 @@ public class Person : MonoBehaviour
     {
         myMat.color = newColor;
     }
-    
-    public Vector3 Move(Vector3 moveDir)
-    {
-        transform.Translate(moveDir);
-        return transform.position;
-    }
 
     public void Kill()
     {
         markedForRemoval = true;
         GetComponent<MeshRenderer>().enabled = false;
+        StartCoroutine(Death());
+    }
+
+    private IEnumerator Death()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Destroy(gameObject);
     }
 }
