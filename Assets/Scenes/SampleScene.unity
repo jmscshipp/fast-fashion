@@ -238,13 +238,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac90a6f53e7a9a4aa1f3aa45de88616, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
-  scale: 15
+  width: 90
+  height: 90
+  scale: 5
   offsetY: 0
-  cutoffValue: 0
+  offsetX: 0
+  cutoffValue: 0.3
   personPrefab: {fileID: 1111143488183809909, guid: 3e6403f112b657e45ac2f34b533de500, type: 3}
   lowerBoundary: 0
+  texRenderer: {fileID: 1851088130}
 --- !u!64 &1851088129
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -266,7 +268,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1851088127}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -279,7 +281,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42bcd70704a1b3f4099138c837af31f6, type: 2}
+  - {fileID: 2100000, guid: ccf45db92697c6646817b40cb37dbcb0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -343,7 +345,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1926406154
 Transform:
   m_ObjectHideFlags: 0

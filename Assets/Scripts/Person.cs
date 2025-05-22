@@ -7,6 +7,7 @@ public class Person : MonoBehaviour
     [SerializeField]
     private Material baseMat;
     private Material myMat;
+    public bool markedForRemoval = false;
 
     // Start is called before the first frame update
     void Awake()
@@ -20,14 +21,15 @@ public class Person : MonoBehaviour
         myMat.color = newColor;
     }
     
-    public float Walk(float walkSpeed)
+    public Vector3 Move(Vector3 moveDir)
     {
-        transform.Translate(Vector3.down * walkSpeed * Time.deltaTime);
-        return transform.position.y;
+        transform.Translate(moveDir);
+        return transform.position;
     }
 
     public void Kill()
     {
+        markedForRemoval = true;
         GetComponent<MeshRenderer>().enabled = false;
     }
 }
